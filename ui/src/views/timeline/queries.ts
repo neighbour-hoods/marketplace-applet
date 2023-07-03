@@ -5,6 +5,7 @@ import gql from 'graphql-tag'
 export const readListingTimeline = gql`{
   proposals {
     id
+    revisionId
     note
     name
     hasBeginning
@@ -13,9 +14,11 @@ export const readListingTimeline = gql`{
     inScopeOf
     publishes {
       id
+      revisionId
       reciprocal
       publishes {
         id
+        revisionId
         note
         name
         action
@@ -52,8 +55,10 @@ export const readListingTimeline = gql`{
     }
     publishedTo {
       id
+      revisionId
       proposedTo {
         id
+        revisionId
         name
         image
       }
