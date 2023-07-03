@@ -1,13 +1,15 @@
 {
-  "name": "@holo-rea/app-offers-needs-marketplace",
+  "name": "@neighbourhoods/marketplace-applet",
   "private": true,
   "version": "1.0.0",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "clean": "scripts/clean.sh",
-    "build": "rollup -c",
-    "dev": "REACT_APP_HC_CONN_URL='ws://localhost:4001' rollup -c -w",
-    "start": "sirv public -s --single"
+    "start": "vite dev --clearScreen false --port $UI_PORT",
+    "build": "tsc && vite build",
+    "build:watch": "rimraf dist && vite build -w",
+    "package": "npm run clean; npm run build && cd ./dist && bestzip ../ui.zip * ",
+    "test": "vitest --reporter verbose",
+    "clean": "rimraf ui.zip; rimraf dist"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.22.5",
@@ -44,6 +46,7 @@
     "eslint-plugin-standard": "^4.0.1",
     "eslint-plugin-svelte3": "^2.7.3",
     "graphql": "^15.8.0",
+    "rimraf": "^3.0.2",
     "routve": "^1.1.10",
     "sirv-cli": "^0.4.4",
     "svelte-apollo": "^0.4.0"
