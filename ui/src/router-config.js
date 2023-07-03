@@ -14,14 +14,14 @@ export default {
   basePath: '',
   routes: {
     '/': {
-      component: CreateOffer,
-      params: { persistState: 'offer-create-form' },
+      component: Timeline,
     },
     '/offers': {
       component: Offers,
       children: {
         '/new': {
           component: CreateOffer,
+          params: { persistState: 'offer-create-form' },
         },
       },
     },
