@@ -2,8 +2,8 @@
   import Router from 'routve'
   import { setClient } from 'svelte-apollo'
 
-  import initGraphQLClient from '__GRAPHQL_CLIENT_MODULE__'
-  import routerConfig from './router-config'
+  import initGraphQLClient from '@vf-ui/graphql-client-holochain'
+  import routerConfig from './router-config.js'
 
   // init and manage GraphQL client connection
   let client = null

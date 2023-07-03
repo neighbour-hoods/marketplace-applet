@@ -1,5 +1,4 @@
 {
-  "extends": "@tsconfig/svelte/tsconfig.json",
   "compilerOptions": {
     "lib": [
       "esnext",
@@ -19,10 +18,5 @@
     "noUnusedParameters": false,
     "strict": true
   },
-  "files": [
-    "src/main.ts"
-  ],
-  "include": [
-    "src/**/*.ts",
-  ]
+  "include": ["src/*.ts", "src/**/*.ts", "src/*.svelte", "src/**/*.svelte"]
 }
