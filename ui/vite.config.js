@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
-import { viteStaticCopy } from "vite-plugin-static-copy";
-import { VitePluginFonts } from 'vite-plugin-fonts'
+import { sveltekit } from '@sveltejs/kit/vite';
+// import { viteStaticCopy } from "vite-plugin-static-copy";
+// import { VitePluginFonts } from 'vite-plugin-fonts'
 
 const components = [
   "dialog",
@@ -35,7 +36,11 @@ export default defineConfig({
       inline: [/@neighbourhoods/, /@scoped-elements\/shoelace/]
     }
   },
+  define: {
+    'process.env': process.env,
+  },
   plugins: [
+    sveltekit(),
     // checker({
     //   typescript: true,
     //   eslint: {

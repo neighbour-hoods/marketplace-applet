@@ -25,10 +25,9 @@
   </head>
 
   <body>
-    <provider-app-test-harness></provider-app-test-harness>
     <script type="text/javascript">
       window.process || (process = { env: {} })
     </script>
-    <script defer src='/build/bundle.js'></script>
+    <script type="module" src="./src/main.ts"></script>
   </body>
 </html>
