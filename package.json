@@ -22,7 +22,7 @@
     "download-hrea-agent": "[ ! -f \"workdir/hrea_agent.dna\" ] && curl -L --output workdir/hrea_agent.dna https://github.com/h-REA/hREA/releases/download/happ-0.1.3-beta/hrea_agent.dna; exit 0",
     "download-hrea-planning": "[ ! -f \"workdir/hrea_planning.dna\" ] && curl -L --output workdir/hrea_planning.dna https://github.com/h-REA/hREA/releases/download/happ-0.1.3-beta/hrea_planning.dna; exit 0",
     "download-hrea-proposal": "[ ! -f \"workdir/hrea_proposal.dna\" ] && curl -L --output workdir/hrea_proposal.dna https://github.com/h-REA/hREA/releases/download/happ-0.1.3-beta/hrea_proposal.dna; exit 0",
-    "start:ui": "npm run start -w ui",
+    "start:ui": "pushd ui; npm run start; popd",
     "preinstall": "npx only-allow pnpm",
     "postinstall": "node ./workaround-vf-units.patch.cjs && npm run download-sensemaker && npm run download-hrea-obs && npm run download-hrea-specification && npm run download-hrea-agent && npm run download-hrea-planning && npm run download-hrea-proposal",
     "clean:build": "rimraf ui/.rollup.cache; rimraf nh-launcher-applet/.rollup.cache; rm nh-launcher-applet/ui.zip; exit 0",
