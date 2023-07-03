@@ -38,7 +38,11 @@ export const fragments = {
 export const readOpenOffers = gql`
   query {
     intents {
-      ...OffersIntent
+      edges {
+        node {
+          ...OffersIntent
+        }
+      }
     }
   }
   ${fragments.intent}
