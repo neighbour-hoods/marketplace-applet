@@ -9,7 +9,7 @@ roles:
       strategy: create
       deferred: false
     dna:
-      bundled: "./hrea_observation.dna"
+      bundled: "../hrea_observation.dna"
       modifiers:
         network_seed: ~
         properties: ~
@@ -23,7 +23,7 @@ roles:
       strategy: create
       deferred: false
     dna:
-      bundled: "./hrea_specification.dna"
+      bundled: "../hrea_specification.dna"
       modifiers:
         network_seed: ~
         properties: ~
@@ -37,7 +37,7 @@ roles:
       strategy: create
       deferred: false
     dna:
-      bundled: "./hrea_agent.dna"
+      bundled: "../hrea_agent.dna"
       modifiers:
         network_seed: ~
         properties: ~
@@ -51,7 +51,7 @@ roles:
       strategy: create
       deferred: false
     dna:
-      bundled: "./hrea_planning.dna"
+      bundled: "../hrea_planning.dna"
       modifiers:
         network_seed: ~
         properties: ~
@@ -65,7 +65,7 @@ roles:
       strategy: create
       deferred: false
     dna:
-      bundled: "./hrea_proposal.dna"
+      bundled: "../hrea_proposal.dna"
       modifiers:
         network_seed: ~
         properties: ~
