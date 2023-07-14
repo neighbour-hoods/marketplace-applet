@@ -1,7 +1,7 @@
 /**
  * Svelte store persistence helper
  *
- * Mainly for use with svelte-formup `values` stores.
+ * Mainly for use with svelte-forms stores.
  *
  * @package: ValueFlows UI
  * @since:   2020-08-17

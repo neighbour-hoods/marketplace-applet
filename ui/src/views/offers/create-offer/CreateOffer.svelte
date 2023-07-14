@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 /**
  * Top-level offer / request creation form
  *
@@ -16,8 +16,15 @@
  * @since    2020-10-13
  */
 import * as yup from 'yup'
-import { formup } from 'svelte-formup'
+import { form, field } from 'svelte-forms'
+import { required } from 'svelte-forms/validators'
 import { mutation } from 'svelte-apollo'
+
+import type {
+  ProposalCreateParams, ProposalResponse,
+  Intent, IntentCreateParams, IntentResponse,
+  ProposedIntentResponse,
+} from '@valueflows/vf-graphql'
 
 import addPersistence from '@vf-ui/persist-svelte-store'
 import BindContextAgent from '@vf-ui/bind-context-agent'
@@ -31,7 +38,7 @@ import { createIntent } from '@vf-ui/offer-intent-create-form/queries'
 import { createProposal, createProposedIntent, createProposedTo } from './queries'
 
 // An array of vf:Agent identities (usually of Organizations) to use as accounting scopes for records created by this form
-export let inScopeOf = null
+export let inScopeOf: string[] | null = null
 
 // set to a string to persist the form state within the given key
 export let persistState = false
@@ -41,98 +48,94 @@ export let persistState = false
 let pendingIntents = []
 
 // bindings to child form control submission / validation actions
-let intentValidators = []
+let intentValidators: Array<() => void> = []
 
 // API bindings
-const runCreateProposal = mutation(createProposal)
-const runCreateIntent = mutation(createIntent)
-const runCreateProposedIntent = mutation(createProposedIntent)
+const runCreateProposal = mutation<{ createProposal: ProposalResponse }, { proposal: ProposalCreateParams }>(createProposal)
+const runCreateIntent = mutation<{ createIntent: IntentResponse }, { intent: IntentCreateParams }>(createIntent)
+const runCreateProposedIntent = mutation<{ proposeIntent: ProposedIntentResponse }, { proposal: string, intent: string, reciprocal?: boolean }>(createProposedIntent)
 // const runCreateProposedTo = mutation(createProposedTo) :TODO:
 
 // top-level sub-states of the listing form
 const listingTypes = ['gift', 'need', 'offer', 'request']
 
-const formCtx = formup({
-  schema: yup.object().shape({
-    name: yup.string(),
-    note: yup.string(),
+// form data state
+const listingTypeValidator = () => (value: string) => ({ valid: listingTypes.indexOf(value) !== -1, name: 'listing_type_ok' })
+const name = field('name', '')
+const note = field('note', '')
+const listingType = field('listingType', 'gift', [listingTypeValidator()])
+const formData = form(
+  name, note,
+  listingType,
+)
+// inject persistence subscriber to overarching form store if configured
+const formCtx = persistState ? addPersistence(persistState, formData) : formData
 
-    // not VF fields, internal form state only
-    listingType: yup.string().oneOf(listingTypes),
-  }),
-  async onSubmit (data, context) {
-    // reset submission state
-    pendingIntents = []
+// submission action handler
+async function onSubmit (e) {
+  console.info('SUBMIT', e, formCtx)
+  const data = e.data
+  // reset submission state
+  pendingIntents = []
 
-    // trigger child form validation
-    await Promise.all(intentValidators.map(validator => validator()))
+  // trigger child form validation
+  await Promise.all(intentValidators.map(validator => validator()))
 
-    // post-validation checks
-    switch (data.listingType) {
-      default:
-        // all actions must ensure the presence of a primary intent
-        if (pendingIntents.length < 1) {
-          return
-        }
-      // eslint no-fallthrough: 0 */
-      case 'offer':
-      case 'request':
-        // ensure there is at least 1 valid reciprocal intent for bidirectional types
-        if (pendingIntents.length < 2) {
-          return
-        }
-        break
-    }
+  // post-validation checks
+  switch (data.listingType) {
+    default:
+      // all actions must ensure the presence of a primary intent
+      if (pendingIntents.length < 1) {
+        return
+      }
+    // eslint no-fallthrough: 0 */
+    case 'offer':
+    case 'request':
+      // ensure there is at least 1 valid reciprocal intent for bidirectional types
+      if (pendingIntents.length < 2) {
+        return
+      }
+      break
+  }
 
-    // Validated ok! Run submission behaviours...
+  // Validated ok! Run submission behaviours...
 
-    try {
-      // create Proposal to broadcast the listing first
-      const proposalData = await runCreateProposal({
-        variables: { proposal: {
-          name: data.name,
-          note: data.note,
-          hasEnd: new Date(),
-          /* eslint no-undefined: 0 */
-          inScopeOf: (inScopeOf && inScopeOf.length) ? inScopeOf : undefined,
-        } },
-      })
-      const proposalId = proposalData.data.createProposal.proposal.id
+  try {
+    // create Proposal to broadcast the listing first
+    const proposalData = await runCreateProposal({
+      variables: { proposal: {
+        name: data.name,
+        note: data.note,
+        hasEnd: new Date(),
+        /* eslint no-undefined: 0 */
+        inScopeOf: (inScopeOf && inScopeOf.length) ? inScopeOf : undefined,
+      } },
+    })
+    const proposalId = proposalData.data?.createProposal.proposal.id as string
 
-      // create Intents to bind to the Proposal
-      const intents = (await Promise.all(pendingIntents.filter(i => i !== undefined).map(i => runCreateIntent({
-        variables: { intent: i },
-      })))).map(r => r.data.createIntent.intent)
+    // create Intents to bind to the Proposal
+    const intents = (await Promise.all(pendingIntents.filter(i => i !== undefined).map(i => runCreateIntent({
+      variables: { intent: i },
+    })))).map(r => r.data?.createIntent.intent as Intent)
 
-      // create links between all records
-      await Promise.all(intents.map((it, idx) => runCreateProposedIntent({
-        variables: {
-          proposal: proposalId,
-          intent: it.id,
-          reciprocal: idx === 1, // :SHONK: :TODO: handle arbitrary sets of primary / reciprocal intents, not just a pairing
-        },
-      })))
+    // create links between all records
+    await Promise.all(intents.map((it, idx) => runCreateProposedIntent({
+      variables: {
+        proposal: proposalId,
+        intent: it.id,
+        reciprocal: idx === 1, // :SHONK: :TODO: handle arbitrary sets of primary / reciprocal intents, not just a pairing
+      },
+    })))
 
-      // :TODO: show success indicator in UI
-      console.info('SENT!', proposalData.data.createProposal.proposal, intents)
+    // :TODO: show success indicator in UI
+    console.info('SENT!', proposalData.data?.createProposal.proposal, intents)
 
-      // clear form state on succcess
-      reset()
-    } catch (e) {
-      // :TODO: nice error display
-      console.error(e)
-    }
-  },
-})
-const { validate, validity } = formCtx
-let { values } = formCtx
-
-// set initial form values
-reset()
-
-// inject persistence wrapper to store if configured
-if (persistState) {
-  values = addPersistence(persistState, values)
+    // clear form state on succcess
+    reset()
+  } catch (e) {
+    // :TODO: nice error display
+    console.error(e)
+  }
 }
 
 function updatePrimaryIntent (event) {
@@ -151,7 +154,7 @@ function removeValidator (ctx) {
 }
 
 function reset () {
-  $values = { listingType: 'gift' }
+  formCtx.reset()
 }
 
 // form labels (:TODO: move to i18n layer)
@@ -166,41 +169,39 @@ $: console.log('pending intents', pendingIntents)
 $: console.log('intent validators', intentValidators)
 </script>
 
-<form use:validate>
+<form on:submit={onSubmit}>
   <h3>What will you do today?</h3>
 
-  <p use:validity>
+  <p>
     {#each listingTypes as lType}
     <label>
-      <input type=radio bind:group={$values.listingType} value={lType} />
+      <input type=radio bind:group={$listingType.value} value={lType} />
       {LISTING_TYPE_LABELS[lType]}
     </label>
     {/each}
-    <FieldError at="listingType" />
   </p>
 
-  <p use:validity>
+  <p>
     <label for="name">Name your listing</label>
-    <input id="name" bind:value="{$values.name}" type="text" />
-    <FieldError at="name" />
+    <input id="name" bind:value="{$name.value}" type="text" />
+    <FieldError form={formCtx} check="name.required">Please name your listing</FieldError>
   </p>
 
-  <p use:validity>
+  <p>
     <label for="note">Provide a description</label>
-    <textarea id="note" bind:value="{$values.note}" placeholder="be as detailed as you like..." />
-    <FieldError at="note" />
+    <textarea id="note" bind:value="{$note.value}" placeholder="be as detailed as you like..." />
   </p>
 
   <hr />
 
   <BindContextAgent let:contextAgent>
-    {#if $values.listingType === 'gift'}
+    {#if $listingType.value === 'gift'}
       <ListOfferIntent {contextAgent} persistState={`${persistState}-ointent`}
         on:validated={updatePrimaryIntent} on:initForm={addValidator} on:unloadForm={removeValidator} />
-    {:else if $values.listingType === 'need'}
+    {:else if $listingType.value === 'need'}
       <ListRequestIntent {contextAgent} persistState={`${persistState}-rintent`}
         on:validated={updatePrimaryIntent} on:initForm={addValidator} on:unloadForm={removeValidator} />
-    {:else if $values.listingType === 'offer'}
+    {:else if $listingType.value === 'offer'}
       <ListOfferIntent {contextAgent} persistState={`${persistState}-ointent`}
         on:validated={updatePrimaryIntent} on:initForm={addValidator} on:unloadForm={removeValidator} />
       <hr />
@@ -214,7 +215,7 @@ $: console.log('intent validators', intentValidators)
           'deliver-service': 'Delivery of a special service',
         }}
         />
-    {:else if $values.listingType === 'request'}
+    {:else if $listingType.value === 'request'}
       <ListRequestIntent {contextAgent} persistState={`${persistState}-rintent`}
         on:validated={updatePrimaryIntent} on:initForm={addValidator} on:unloadForm={removeValidator} />
       <hr />
@@ -237,7 +238,7 @@ $: console.log('intent validators', intentValidators)
 
   <p>
     <button type="submit">Publish listing</button>
-    <button type="reset">Reset</button>
+    <button type="reset" on:click={formCtx.reset}>Reset</button>
   </p>
 </form>
 

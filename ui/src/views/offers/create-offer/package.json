@@ -29,7 +29,7 @@
     "@vf-ui/offer-intent-create-form": "workspace:*",
     "@vf-ui/persist-svelte-store": "workspace:*",
     "graphql-tag": "^2.11.0",
-    "svelte-formup": "^0.6.2",
+    "svelte-forms": "^2.3.1",
     "yup": "^0.29.1"
   },
   "peerDependencies": {

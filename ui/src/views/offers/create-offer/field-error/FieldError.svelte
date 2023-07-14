@@ -1,18 +1,11 @@
 <script>
-  import { getFormupContext } from 'svelte-formup'
-
-  export let at
-
-  const { invalid } = getFormupContext()
-
-  let error
-
-  $: error = $invalid.get(at)
+  export let form
+  export let check = ''
 </script>
 
-{#if error}
+{#if $form.hasError(check)}
 <span class="error" aria-live="polite">
-  <slot {error}>{error.message}</slot>
+  <slot></slot>
 </span>
 {/if}
 
