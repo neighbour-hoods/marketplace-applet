@@ -230,9 +230,9 @@ importers:
       svelte-apollo:
         specifier: '>=0.3'
         version: 0.4.0(@apollo/client@3.7.0)(graphql@15.8.0)(svelte@3.59.2)
-      svelte-formup:
-        specifier: ^0.6.2
-        version: 0.6.2(svelte@3.59.2)
+      svelte-forms:
+        specifier: ^2.3.1
+        version: 2.3.1
       yup:
         specifier: ^0.29.1
         version: 0.29.1
@@ -266,9 +266,9 @@ importers:
       svelte-apollo:
         specifier: '>=0.3'
         version: 0.4.0(@apollo/client@3.7.0)(graphql@15.8.0)(svelte@3.59.2)
-      svelte-formup:
-        specifier: ^0.6.2
-        version: 0.6.2(svelte@3.59.2)
+      svelte-forms:
+        specifier: ^2.3.1
+        version: 2.3.1
       yup:
         specifier: ^0.29.1
         version: 0.29.1
@@ -311,9 +311,9 @@ importers:
       svelte-apollo:
         specifier: '>=0.3'
         version: 0.4.0(@apollo/client@3.7.0)(graphql@15.8.0)(svelte@3.59.2)
-      svelte-formup:
-        specifier: ^0.6.2
-        version: 0.6.2(svelte@3.59.2)
+      svelte-forms:
+        specifier: ^2.3.1
+        version: 2.3.1
 
   ui/src/views/offers/create-offer/measure-input:
     dependencies:
@@ -5127,6 +5127,10 @@ packages:
     engines: {node: '>=0.10.0'}
     dev: true
 
+  /is-promise@4.0.0:
+    resolution: {integrity: sha512-hvpoI6korhJMnej285dSg6nu1+e6uxs7zG3BYAm5byqDsgJNWwxzM6z6iZiAgQR4TJ30JmBTOwqZUw3WlyH3AQ==}
+    dev: false
+
   /is-reference@1.2.1:
     resolution: {integrity: sha512-U82MsXXiFIrjCK4otLT+o2NA2Cd2g5MLoOVXUZjIOhLurrRxpEXzI8O0KZHr3IjLvlAH1kTPYSuqer5T9ZVBKQ==}
     dependencies:
@@ -6412,13 +6416,10 @@ packages:
     resolution: {integrity: sha512-TVDn5Vd8L0WI0Y9BFh/2I7judkIqYCbFKkGwGl/f8D0inwBFNyU0weKhrbJY4VQtYnWriq0NPl+mIYGisgALbw==}
     dev: false
 
-  /svelte-formup@0.6.2(svelte@3.59.2):
-    resolution: {integrity: sha512-3ENC9BysmTpXMCeIuJ2MByduqifk1LCgt8NZHbyaUjz9OiJJjJ11dweauBNWY4wqrEExuMDb46srlaCbCTh4Kw==}
-    engines: {node: '>=12.4'}
-    peerDependencies:
-      svelte: 3.x
+  /svelte-forms@2.3.1:
+    resolution: {integrity: sha512-ExX9PM0JgvdOWlHl2ztD7XzLNPOPt9U5hBKV8sUAisMfcYWpPRnyz+6EFmh35BOBGJJmuhTDBGm5/7seLjOTIA==}
     dependencies:
-      svelte: 3.59.2
+      is-promise: 4.0.0
     dev: false
 
   /svelte-hmr@0.15.2(svelte@3.59.2):
