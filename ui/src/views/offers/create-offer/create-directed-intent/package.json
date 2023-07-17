@@ -29,8 +29,9 @@
     "@vf-ui/form-input-date": "workspace:*",
     "@vf-ui/form-input-measure": "workspace:*",
     "@vf-ui/persist-svelte-store": "workspace:*",
+    "fecha": "^4.2.0",
     "graphql-tag": "^2.11.0",
-    "svelte-formup": "^0.6.2",
+    "svelte-forms": "^2.3.1",
     "yup": "^0.29.1"
   },
   "peerDependencies": {
