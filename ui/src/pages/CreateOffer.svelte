@@ -5,5 +5,5 @@
 
 <OffersNav />
 <section>
-  <CreateOfferForm />
+  <CreateOfferForm persistState="offer-create-form" />
 </section>
