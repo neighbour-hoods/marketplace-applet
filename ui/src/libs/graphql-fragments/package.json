@@ -1,0 +1,12 @@
+{
+  "name": "@valueflows/vf-marketplace-graphql-fragments",
+  "version": "0.0.1",
+  "description": "GraphQL resolver fragments for Valueflows data useful in applications implementing Marketplace functionality.",
+  "type": "module",
+  "main": "./index.ts",
+  "dependencies": {
+    "@valueflows/vf-graphql": "^0.9.0-alpha.9",
+    "graphql-tag": "^2.12.6"
+  },
+  "devDependencies": {}
+}

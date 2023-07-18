@@ -1,14 +1,14 @@
 import gql from 'graphql-tag'
 
-import * as OffersQueries from '../../queries'
+import { OfferIntentFields } from '@valueflows/vf-marketplace-graphql-fragments/offers.fragments'
 
 export const createIntent = gql`
+  ${OfferIntentFields}
   mutation($intent: IntentCreateParams) {
     createIntent(intent: $intent) {
       intent {
-        ...OffersIntent
+        ...OfferIntentFields
       }
     }
   }
-  ${OffersQueries.fragments.intent}
 `

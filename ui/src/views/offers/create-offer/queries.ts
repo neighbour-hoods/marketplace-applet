@@ -1,18 +1,18 @@
 import gql from 'graphql-tag'
 
-import * as OffersQueries from '../queries'
+import { OfferProposalFields } from '@valueflows/vf-marketplace-graphql-fragments/offers.fragments'
 
 // :TODO: reuse query fragments
 
 export const createProposal = gql`
+  ${OfferProposalFields}
   mutation($proposal: ProposalCreateParams) {
     createProposal(proposal: $proposal) {
       proposal {
-        ...OffersProposal
+        ...OfferProposalFields
       }
     }
   }
-  ${OffersQueries.fragments.proposal}
 `
 
 export const createProposedIntent = gql`
