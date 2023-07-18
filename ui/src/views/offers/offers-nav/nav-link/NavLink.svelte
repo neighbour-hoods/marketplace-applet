@@ -1,12 +1,12 @@
 <script>
-  import { path } from 'routve'
+  import { link, location } from 'svelte-spa-router'
 
   export let href
   export let label
 </script>
 
-<li class={$path == href ? "active" : ''}>
-  <a href={href}>{label}</a>
+<li class={$location == href ? "active" : ''}>
+  <a href={href} use:link>{label}</a>
 </li>
 
 <style type="text/css">

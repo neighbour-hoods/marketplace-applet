@@ -5,25 +5,12 @@
  * @since:   2020-07-14
  */
 
-import Timeline from '@vf-ui/timeline-page'
-
-import Offers from '@vf-ui/offers-page'
-import CreateOffer from '@vf-ui/offer-create-form'
+import Timeline from './pages/Timeline.svelte'
+import Offers from './pages/Offers.svelte'
+import CreateOffer from './pages/CreateOffer.svelte'
 
 export default {
-  basePath: '',
-  routes: {
-    '/': {
-      component: Timeline,
-    },
-    '/offers': {
-      component: Offers,
-      children: {
-        '/new': {
-          component: CreateOffer,
-          params: { persistState: 'offer-create-form' },
-        },
-      },
-    },
-  },
+  '/': Timeline,
+  '/offers': Offers,
+  '/offers/new': CreateOffer,
 }

@@ -1,9 +1,9 @@
 <script>
-  import Router from 'routve'
+  import Router, { link } from 'svelte-spa-router'
   import { setClient } from 'svelte-apollo'
 
   import initGraphQLClient from '@vf-ui/graphql-client-holochain'
-  import routerConfig from './router-config.js'
+  import routes from './router-config.js'
 
   // init and manage GraphQL client connection
   let client = null
@@ -37,7 +37,13 @@
     <h1>Cannot connect to Holochain</h1>
     <p>{error.message}</p>
   {:else}
-    <Router routerConfig={routerConfig} />
+    <ul>
+      <li><a use:link href="/offers/new">New listing</a></li>
+      <li><a use:link href="/">View all</a></li>
+      <li><a use:link href="/offers">Offers</a></li>
+      <li><a use:link href="/requests">Requests</a></li>
+    </ul>
+    <Router {routes} />
   {/if}
 </main>
 
