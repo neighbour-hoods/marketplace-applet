@@ -65,6 +65,9 @@ importers:
       '@apollo/client':
         specifier: ^3.7.0
         version: 3.7.0(graphql@15.8.0)
+      '@valueflows/vf-marketplace-graphql-fragments':
+        specifier: workspace:*
+        version: link:src/libs/graphql-fragments
       '@vf-ui/graphql-client-holochain':
         specifier: 0.0.1-alpha.21
         version: 0.0.1-alpha.21(@apollo/client@3.7.0)(graphql@15.8.0)(ws@8.13.0)
@@ -172,6 +175,15 @@ importers:
         specifier: ^0.31.0
         version: 0.31.0
 
+  ui/src/libs/graphql-fragments:
+    dependencies:
+      '@valueflows/vf-graphql':
+        specifier: ^0.9.0-alpha.9
+        version: 0.9.0-alpha.9(graphql@15.8.0)
+      graphql-tag:
+        specifier: ^2.12.6
+        version: 2.12.6(graphql@15.8.0)
+
   ui/src/libs/persist-svelte-store:
     dependencies:
       debounce:
@@ -185,6 +197,9 @@ importers:
 
   ui/src/views/offers/create-offer:
     dependencies:
+      '@valueflows/vf-marketplace-graphql-fragments':
+        specifier: workspace:*
+        version: link:../../../libs/graphql-fragments
       '@vf-ui/bind-context-agent':
         specifier: workspace:*
         version: link:../../util/bind-context-agent
