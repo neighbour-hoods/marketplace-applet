@@ -1,6 +1,6 @@
 <script>
   import { query } from 'svelte-apollo'
-  import { readListingTimeline } from './queries.ts'
+  import { readListingTimeline } from './Timeline-queries.ts'
 
   const proposals = query(readListingTimeline)
 </script>
