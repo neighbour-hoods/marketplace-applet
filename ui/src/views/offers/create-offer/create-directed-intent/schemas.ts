@@ -5,28 +5,16 @@
  * @since:   2020-08-12
  */
 
-import { form, field, combined } from 'svelte-forms'
-import type { Field } from 'svelte-forms/types'
-import { get } from 'svelte/store'
-import type { Readable } from 'svelte/store'
-import { required, pattern } from 'svelte-forms/validators'
+import * as yup from 'yup'
 
 import { ACTION_IDS_MARKETPLACE } from '@vf-ui/core'
 
-export type IntentFormType = 'provider' | 'receiver'
+enum IntentFormType { provider, receiver }
 
-// validators
-
-const oneOfSet = (setValues: any[], validatorName: string) => (value: string) => ({ valid: setValues.indexOf(value) !== -1, name: validatorName })
-function requiredIf<T> (store: Readable<Field<T>>, vals: T[]) { return (value: string) => vals.indexOf(get(store).value) !== -1 ? required()(value) : { valid: true, name: 'required' } }
-
-// schema / form field / reactive data defs
-
-const measureFields = [
-  field('hasNumericalValue', '1', [pattern(/\d+/)]),
-  field('hasUnit', ''),
-]
-function measureReducer ([hasNumericalValue, hasUnit]: [string, string]) { return { hasNumericalValue, hasUnit } }
+const measure = yup.object().shape({
+  hasNumericalValue: yup.number(),
+  hasUnit: yup.string(),
+}).default(undefined)
 
 // const location = yup.object().shape({
 //   name: yup.string().required(),
@@ -37,49 +25,40 @@ function measureReducer ([hasNumericalValue, hasUnit]: [string, string]) { retur
 //   alt: yup.number(),
 // })
 
-export const buildFormSpec = (ft: IntentFormType) => {
+export const buildFormSpec = (ft: IntentFormType) => yup.object().shape({
+  [ft]: yup.string().required(),
+  action: yup.string().oneOf(ACTION_IDS_MARKETPLACE).required(),
+  name: yup.string(),
+  note: yup.string(),
+  // image: yup.string(),
+  // resourceClassifiedAs: yup.array().of(yup.string()).ensure(),
+  resourceConformsTo: yup.string(),
+  // resourceInventoriedAs: yup.string(),
+  resourceQuantity: measure.clone(),
+  // effortQuantity: measure.clone(),
+  // availableQuantity: measure.clone(),
+  hasBeginning: yup.date().when('dateMode', {
+    is: 'range',
+    then: yup.date().required(),
+    otherwise: yup.date(),
+  }),
+  hasEnd: yup.date().when('dateMode', {
+    is: 'range',
+    then: yup.date().required(),
+    otherwise: yup.date(),
+  }),
+  hasPointInTime: yup.date().when('dateMode', {
+    is: 'single',
+    then: yup.date().required(),
+    otherwise: yup.date(),
+  }),
+  due: yup.date(),
+  // atLocation: location.clone(),
+  // agreedIn: yup.string(),
+
   // not part of VF spec- internal form state
-  const dateMode = field('dateMode', 'none', [required(), oneOfSet(['none', 'single', 'before', 'range', 'after'], 'date_mode_ok')])
-
-  const senderId = field(ft, '', [required()])
-  const action = field('action', 'transfer', [required(), oneOfSet(ACTION_IDS_MARKETPLACE, 'action_ok')])
-  const name = field('name', '')
-  const note = field('note', '')
-  const resourceConformsTo = field('resourceConformsTo', '')
-  // @ts-ignore
-  const resourceQuantity = combined('resourceQuantity', measureFields, measureReducer)
-  // @ts-ignore
-  const effortQuantity = combined('effortQuantity', measureFields, measureReducer)
-
-  // :TODO: date field format validation
-  const hasBeginning = field('hasBeginning', '', [requiredIf(dateMode, ['range', 'after'])])
-  const hasEnd = field('hasEnd', '', [requiredIf(dateMode, ['range', 'before'])])
-  const hasPointInTime = field('hasPointInTime', '', [requiredIf(dateMode, ['single'])])
-  const due = field('due', '')
-
-  // :TODO: atLocation, agreedIn, image, resourceClassifiedAs, resourceInventoriedAs, availableQuantity
-
-  return {
-    senderId,
-    action,
-    name,
-    note,
-    resourceConformsTo,
-    resourceQuantity,
-    effortQuantity,
-    hasBeginning,
-    hasEnd,
-    hasPointInTime,
-    due,
-    dateMode,
-    form: form(
-      senderId, action, name, note,
-      resourceConformsTo, resourceQuantity, effortQuantity,
-      hasBeginning, hasEnd, hasPointInTime, due,
-      dateMode,
-    ),
-  }
-}
+  dateMode: yup.string().oneOf(['none', 'single', 'before', 'range', 'after']),
+})
 
 export const buildSubmitHandler = (ft: IntentFormType, dispatch: Function) =>
   (data, context) => {
