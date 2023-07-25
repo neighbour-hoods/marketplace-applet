@@ -84,10 +84,6 @@ onDestroy(async () => {
   dispatch('unloadForm', form)
 })
 
-function reset () {
-  form.reset()
-}
-
 // reactive handlers to publish local state back into the form validator
 $: {
   if (selectedTimeRange && selectedTimeRange.length === 2) {

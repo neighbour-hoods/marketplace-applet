@@ -58,7 +58,7 @@ const listingTypes = ['gift', 'need', 'offer', 'request']
 
 // form data state
 const listingTypeValidator = () => (value: string) => ({ valid: listingTypes.indexOf(value) !== -1, name: 'listing_type_ok' })
-const { form, data } = createForm({
+const { form, data, reset } = createForm({
   onSubmit,
   initialValues: {
     listingType: 'gift',
@@ -149,10 +149,6 @@ function removeValidator (ctx) {
   intentValidators = intentValidators.filter(cb => cb !== ctx.detail.submit)
 }
 
-function reset () {
-  formCtx.reset()
-}
-
 // form labels (:TODO: move to i18n layer)
 const LISTING_TYPE_LABELS = {
   gift: 'Gift something',
@@ -234,7 +230,7 @@ $: console.log('intent validators', intentValidators)
 
   <p>
     <button type="submit">Publish listing</button>
-    <button type="reset" on:click={formCtx.reset}>Reset</button>
+    <button type="reset" on:click={reset}>Reset</button>
   </p>
 </form>
 
