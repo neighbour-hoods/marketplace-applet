@@ -40,6 +40,7 @@
     "@vf-ui/graphql-client-holochain": "0.0.1-alpha.21",
     "@vf-ui/offer-create-form": "workspace:*",
     "@vf-ui/offers-nav": "workspace:*",
+    "@webcomponents/scoped-custom-element-registry": "^0.0.9",
     "eslint": "^7.5.0",
     "eslint-config-standard": "^14.1.1",
     "eslint-plugin-import": "^2.22.0",
