@@ -8,6 +8,9 @@
  */
 import { createEventDispatcher, onMount, onDestroy } from 'svelte'
 import { format } from 'fecha'
+import { createForm } from 'felte'
+import { validator } from '@felte/validator-yup'
+import * as yup from 'yup'
 
 import addPersistence from '@vf-ui/persist-svelte-store'
 import { ACTION_IDS_MARKETPLACE } from '@vf-ui/core'
@@ -59,76 +62,76 @@ const onSubmit = buildSubmitHandler(contextAgentType, dispatch)
 
 // -- FORM STATE --
 
+const { form, data, setData } = createForm({
+  onSubmit,
+  initialValues: {
+    listingType: 'gift',
+  },
+  extend: validator({ schema: buildFormSpec(contextAgentType) }),
+})
+// :TODO: inject persistence subscriber to overarching form store if configured
 
 // -- INIT LOGIC --
-
-const {
-  form: formData,
-  senderId, action, name, note,
-  resourceConformsTo, resourceQuantity, effortQuantity,
-  hasBeginning, hasEnd, hasPointInTime, due,
-  dateMode,
-} = buildFormSpec(contextAgentType)
-const formCtx = persistState ? addPersistence(persistState, formData) : formData
 
 onMount(async () => {
   // Also trigger an event to propagate the form state data to parent controls.
   // The on:initForm API is needed instead of bind:validate when parent controls
   // dynamically update the presence of child components (bindings appear to only fire once)
-  dispatch('initForm', formCtx)
+  dispatch('initForm', form)
 })
 onDestroy(async () => {
   // trigger a destroy event too, to allow parent controls to unbind any validation logic
-  dispatch('unloadForm', formCtx)
+  dispatch('unloadForm', form)
 })
 
 function reset () {
-  formCtx.reset()
+  form.reset()
 }
 
 // reactive handlers to publish local state back into the form validator
-$senderId = contextAgent
 $: {
   if (selectedTimeRange && selectedTimeRange.length === 2) {
-    $hasBeginning = format(selectedTimeRange[0], SHORT_ISODATETIME_FORMAT)
-    $hasEnd = format(selectedTimeRange[1], SHORT_ISODATETIME_FORMAT)
+    setData('hasBeginning', format(selectedTimeRange[0] as Date, SHORT_ISODATETIME_FORMAT))
+    setData('hasEnd', format(selectedTimeRange[1] as Date, SHORT_ISODATETIME_FORMAT))
   }
 }
 </script>
 
-<form on:submit={onSubmit}>
+<form use:form>
   <h3>{formTitle}</h3>
+
+  <input type="hidden" name={contextAgentType} value={contextAgent} />
 
   <p>
     {#each ACTION_IDS_MARKETPLACE as actionId}
     <label>
-      <input type=radio bind:group={$action.value} value={actionId} />
+      <input type=radio name="action" value={actionId} />
       {ACTION_FORM_LABELS[actionId]}
     </label>
     {/each}
-    <FieldError form={formCtx} check="action.required">Please specify your intention.</FieldError>
+    <FieldError form={form} check="action.required">Please specify your intention.</FieldError>
   </p>
 
   <p>
     <!-- :TODO: resource autocomplete -->
-    <input type="text" bind:value={$resourceConformsTo.value} />
+    <input type="text" name="resourceConformsTo" />
   </p>
 
-  {#if $action.value === 'transfer' || $action.value === 'transfer-custody'}
+  {#if $data.action === 'transfer' || $data.action === 'transfer-custody'}
     <h3>How many?</h3>
   {:else}
     <h3>For how long?</h3>
     <!-- :TODO: should "deliver-service" give the option for time-based & unitless measures? What about other unit types? -->
   {/if}
   <p>
-    <MeasureInput bind:normalizedValue={$resourceQuantity.value} />
+    <MeasureInput bind:normalizedValue={$data.resourceQuantity} />
     <small>(leave blank if you don't know yet)</small>
   </p>
 
-  {#if $action.value === 'transfer-custody'}
+  {#if $data.action === 'transfer-custody'}
     <h3>For how long?</h3>
     <p>
-      <MeasureInput bind:normalizedValue={$effortQuantity.value} />
+      <MeasureInput bind:normalizedValue={$data.effortQuantity} />
       <small>(Leave blank for no limit)</small>
     </p>
   {/if}
@@ -138,28 +141,28 @@ $: {
   <p>
     {#each DATE_INPUT_TYPES as mode}
     <label>
-      <input type=radio bind:group={$dateMode.value} value={mode} />
+      <input type=radio name="dateMode" value={mode} />
       {DATE_SELECTION_LABELS[mode]}
     </label>
     {/each}
-    <FieldError form={formCtx} check="dateMode.required">Please specify when you'd like things to happen.</FieldError>
+    <FieldError form={form} check="dateMode.required">Please specify when you'd like things to happen.</FieldError>
   </p>
 
-  {#if $dateMode.value !== 'none'}
+  {#if $data.dateMode !== 'none'}
   <p>
-    {#if $dateMode.value === 'single'}
-      <DateInput bind:value={$hasPointInTime.value} />
-      <FieldError form={formCtx} check="hasPointInTime.required">This field is required.</FieldError>
-    {:else if $dateMode.value === 'after'}
-      <DateInput bind:value={$hasBeginning.value} />
-      <FieldError form={formCtx} check="hasBeginning.required">This field is required.</FieldError>
-    {:else if $dateMode.value === 'before'}
-      <DateInput bind:value={$hasEnd.value} />
-      <FieldError form={formCtx} check="hasEnd.required">This field is required.</FieldError>
-    {:else if $dateMode.value === 'range'}
+    {#if $data.dateMode === 'single'}
+      <DateInput bind:value={$data.hasPointInTime} />
+      <FieldError form={form} check="hasPointInTime.required">This field is required.</FieldError>
+    {:else if $data.dateMode === 'after'}
+      <DateInput bind:value={$data.hasBeginning} />
+      <FieldError form={form} check="hasBeginning.required">This field is required.</FieldError>
+    {:else if $data.dateMode === 'before'}
+      <DateInput bind:value={$data.hasEnd} />
+      <FieldError form={form} check="hasEnd.required">This field is required.</FieldError>
+    {:else if $data.dateMode === 'range'}
       <DateInput bind:value={selectedTimeRange} selectRange={true}/>
-      <FieldError form={formCtx} check="hasBeginning.required">This field is required.</FieldError>
-      <FieldError form={formCtx} check="hasEnd.required">This field is required.</FieldError>
+      <FieldError form={form} check="hasBeginning.required">This field is required.</FieldError>
+      <FieldError form={form} check="hasEnd.required">This field is required.</FieldError>
     {/if}
   </p>
   {/if}
@@ -167,13 +170,13 @@ $: {
   <!-- <p>
     <label for="name">Title</label>
     <textarea id="name" bind:value="{$name.value}" />
-    <FieldError form={formCtx} check="name.required">This field is required.</FieldError>
+    <FieldError form={form} check="name.required">This field is required.</FieldError>
   </p> -->
 
   <!-- <p>
     <label for="note">Notes</label>
     <textarea id="note" bind:value="{$note.value}" />
-    <FieldError form={formCtx} check="note.required">This field is required.</FieldError>
+    <FieldError form={form} check="note.required">This field is required.</FieldError>
   </p> -->
 
   <!-- :TODO: image -->

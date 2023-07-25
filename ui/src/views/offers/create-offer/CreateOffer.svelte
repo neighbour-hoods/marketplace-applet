@@ -15,11 +15,8 @@
  * @package  ValueFlows UI
  * @since    2020-10-13
  */
-import * as yup from 'yup'
-import { form, field } from 'svelte-forms'
-import { required } from 'svelte-forms/validators'
 import { mutation } from 'svelte-apollo'
-
+import { createForm } from 'felte'
 import type {
   ProposalCreateParams, ProposalResponse,
   Intent, IntentCreateParams, IntentResponse,
@@ -61,19 +58,18 @@ const listingTypes = ['gift', 'need', 'offer', 'request']
 
 // form data state
 const listingTypeValidator = () => (value: string) => ({ valid: listingTypes.indexOf(value) !== -1, name: 'listing_type_ok' })
-const name = field('name', '')
-const note = field('note', '')
-const listingType = field('listingType', 'gift', [listingTypeValidator()])
-const formData = form(
-  name, note,
-  listingType,
-)
-// inject persistence subscriber to overarching form store if configured
-const formCtx = persistState ? addPersistence(persistState, formData) : formData
+const { form, data } = createForm({
+  onSubmit,
+  initialValues: {
+    listingType: 'gift',
+  },
+  // :TODO: validators
+})
+// :TODO: inject persistence subscriber to overarching form store if configured
 
 // submission action handler
 async function onSubmit (e) {
-  console.info('SUBMIT', e, formCtx)
+  console.info('SUBMIT', e, form)
   const data = e.data
   // reset submission state
   pendingIntents = []
@@ -169,13 +165,13 @@ $: console.log('pending intents', pendingIntents)
 $: console.log('intent validators', intentValidators)
 </script>
 
-<form on:submit={onSubmit}>
+<form use:form>
   <h3>What will you do today?</h3>
 
   <p>
     {#each listingTypes as lType}
     <label>
-      <input type=radio bind:group={$listingType.value} value={lType} />
+      <input type=radio name="listingType" value={lType} />
       {LISTING_TYPE_LABELS[lType]}
     </label>
     {/each}
@@ -183,25 +179,25 @@ $: console.log('intent validators', intentValidators)
 
   <p>
     <label for="name">Name your listing</label>
-    <input id="name" bind:value="{$name.value}" type="text" />
-    <FieldError form={formCtx} check="name.required">Please name your listing</FieldError>
+    <input name="name" type="text" />
+    <FieldError form={form} check="name.required">Please name your listing</FieldError>
   </p>
 
   <p>
     <label for="note">Provide a description</label>
-    <textarea id="note" bind:value="{$note.value}" placeholder="be as detailed as you like..." />
+    <textarea id="note" placeholder="be as detailed as you like..." />
   </p>
 
   <hr />
 
   <BindContextAgent let:contextAgent>
-    {#if $listingType.value === 'gift'}
+    {#if $data.listingType === 'gift'}
       <ListOfferIntent {contextAgent} persistState={`${persistState}-ointent`}
         on:validated={updatePrimaryIntent} on:initForm={addValidator} on:unloadForm={removeValidator} />
-    {:else if $listingType.value === 'need'}
+    {:else if $data.listingType === 'need'}
       <ListRequestIntent {contextAgent} persistState={`${persistState}-rintent`}
         on:validated={updatePrimaryIntent} on:initForm={addValidator} on:unloadForm={removeValidator} />
-    {:else if $listingType.value === 'offer'}
+    {:else if $data.listingType === 'offer'}
       <ListOfferIntent {contextAgent} persistState={`${persistState}-ointent`}
         on:validated={updatePrimaryIntent} on:initForm={addValidator} on:unloadForm={removeValidator} />
       <hr />
@@ -215,7 +211,7 @@ $: console.log('intent validators', intentValidators)
           'deliver-service': 'Delivery of a special service',
         }}
         />
-    {:else if $listingType.value === 'request'}
+    {:else if $data.listingType === 'request'}
       <ListRequestIntent {contextAgent} persistState={`${persistState}-rintent`}
         on:validated={updatePrimaryIntent} on:initForm={addValidator} on:unloadForm={removeValidator} />
       <hr />
