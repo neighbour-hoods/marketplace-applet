@@ -5,6 +5,9 @@
   import initGraphQLClient from '@vf-ui/graphql-client-holochain'
   import routes from './router-config.js'
 
+  import { AgentProfileCheck } from '@vf-ui/core-components'
+  import { AgentProfileManage } from '@vf-ui/core-components'
+
   // init and manage GraphQL client connection
   let client = null
   let loading = true
